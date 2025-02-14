@@ -116,7 +116,7 @@ app.get('/inside-bars', async (req, res) => {
     res.json(lastInsideBarsData);
 });
 
-// Manual test endpoint to fetch data immediately
+
 app.get('/test-fetch', async (req, res) => {
     console.log("🔄 Manually fetching inside bars data...");
     const data = await fetchHourlyCandleData();
@@ -126,3 +126,4 @@ app.get('/test-fetch', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
+    
