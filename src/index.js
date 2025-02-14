@@ -33,8 +33,8 @@ const stocks = [
     "MARUTI.NS", "MOTHERSON.NS", "TATAMOTORS.NS", "TVSMOTOR.NS", "ABFRL.NS", 
     "DMART.NS", "NYKAA.NS", "PAGEIND.NS", "PAYTM.NS", "TRENT.NS", 
     "VBL.NS", "ZOMATO.NS", "ASIANPAINT.NS", "BERGEPAINT.NS", "BRITANNIA.NS", 
-    "COLPAL.NS", "DABUR.NS", "GODREJCP.NS", "HINDUNILVR.NS", "ITC.NS", "MARICO.NS", 
-    "NESTLEIND.NS", "TATACONSUM.NS", "UBL.NS", "ALKEM.NS", 
+    "COLPAL.NS", "DABUR.NS", "GODREJCP.NS", "HINDUNILVR.NS", "ITC.NS", 
+    "MARICO.NS", "NESTLEIND.NS", "TATACONSUM.NS", "UBL.NS", "ALKEM.NS", 
     "APLLTD.NS", "AUROPHARMA.NS", "BIOCON.NS", "CIPLA.NS", "DIVISLAB.NS", 
     "DRREDDY.NS", "GLENMARK.NS", "GRANULES.NS", "LAURUSLABS.NS", "LUPIN.NS", 
     "SUNPHARMA.NS", "SYNGENE.NS", "TORNTPHARM.NS", "APOLLOHOSP.NS", "LALPATHLAB.NS", 
@@ -141,11 +141,7 @@ scheduleTimes.forEach(time => {
 
 // API Route to get inside bars
 app.get('/inside-bars', async (req, res) => {
-    const now = moment().tz("Asia/Kolkata");
-    const currentTime = now.format("HH:mm");
-    const scheduledFetchTimes = ['11:30', '12:30', '13:30', '14:30'];
-
-    if (!lastInsideBarsData || !lastFetchTime || scheduledFetchTimes.includes(currentTime)) {
+    if (!lastInsideBarsData || !lastFetchTime || moment().tz("Asia/Kolkata").diff(lastFetchTime, 'minutes') >= 60) {
         await fetchHourlyCandleData();
     }
     res.json(lastInsideBarsData);
