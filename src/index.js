@@ -62,7 +62,7 @@ const fetchHourlyCandleData = async (motherStart, motherEnd, babyStart, babyEnd)
 
         for (const stock of stocks) {
             try {
-                // Fetch mother candle data
+                
                 const motherResult = await yahooFinance.chart(stock, {
                     period1: motherStart.toISOString(),
                     period2: motherEnd.toISOString(),
