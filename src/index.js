@@ -107,7 +107,7 @@ const fetchHourlyCandleData = async () => {
                         change: motherCandleChange.toFixed(2) + "%"
                     },
                     babyCandle: {
-                        timestamp: moment(babyCandle.date).tz("Asia /Kolkata").format("YYYY-MM-DD HH:mm:ss"),
+                        timestamp: moment(babyCandle.date).tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
                         high: babyCandle.high,
                         low: babyCandle.low
                     },
