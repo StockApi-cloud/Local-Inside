@@ -139,10 +139,10 @@ const scheduleCandleFetch = (hour, minute) => {
 
 // Schedule the job at 11:30, 12:30, 1:30, 2:30
 const scheduleTimes = [
-    { hour: 11, minute: 30 },
-    { hour: 12, minute: 30 },
-    { hour: 13, minute: 30 },
-    { hour: 14, minute: 30 }
+    { hour: 11, minute: 20 },
+    { hour: 12, minute: 20 },
+    { hour: 13, minute: 20 },
+    { hour: 14, minute: 20 }
 ];
 
 scheduleTimes.forEach(({ hour, minute }) => {
