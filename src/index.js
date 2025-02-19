@@ -44,7 +44,7 @@ const stocks = [
     "GMRAIRPORT.NS", "IRCTC.NS", "KEI.NS", "NAVINFLUOR.NS", "POLYCAB.NS", "SUNTV.NS", "UPL.NS"
 ];
 
-const PREVIOUS_DAY_URL = "https://previous-day-high-production.up.railway.app/stocks";
+const PREVIOUS_DAY_URL = "https://local-high-production.up.railway.app/stocks";
 
 let lastInsideBarsData = null;
 
