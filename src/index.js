@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 const stocks = [
-   "AXISBANK.NS", "AUBANK.NS", "BANDHANBNK.NS", "BANKBARODA.NS", "BANKINDIA.NS",
+    "AXISBANK.NS", "AUBANK.NS", "BANDHANBNK.NS", "BANKBARODA.NS", "BANKINDIA.NS",
     "CANBK.NS", "CUB.NS", "FEDERALBNK.NS", "HDFCBANK.NS", "ICICIBANK.NS",
     "IDFCFIRSTB.NS", "INDUSINDBK.NS", "KOTAKBANK.NS", "PNB.NS", "RBLBANK.NS",
     "SBIN.NS", "YESBANK.NS", "ABCAPITAL.NS", "ANGELONE.NS", "BAJFINANCE.NS",
@@ -137,7 +137,7 @@ const scheduleCandleFetch = (hour, minute) => {
     });
 };
 
-// Schedule the job at 11:30, 12:30, 1:30, 2:30
+// Schedule the job at specific times
 const scheduleTimes = [
     { hour: 11, minute: 20 },
     { hour: 12, minute: 20 },
@@ -150,24 +150,11 @@ scheduleTimes.forEach(({ hour, minute }) => {
 });
 
 app.get('/inside-bars', async (req, res) => {
-    const now = moment().tz("Asia/Kolkata");
-    const currentHour = now.hour();
-    const currentMinute = now.minute();
-
-    // Check if we are before the next scheduled time
-    const nextScheduledTime = scheduleTimes.find(({ hour, minute }) => {
-        return (hour === currentHour && minute > currentMinute) || (hour > currentHour);
-    });
-
-    if (nextScheduledTime) {
-        const nextHour = nextScheduledTime.hour;
-        const nextMinute = nextScheduledTime.minute;
-        const nextStart = moment().tz("Asia/Kolkata").set({ hour: nextHour, minute: nextMinute }).subtract(2, 'hours').startOf('hour');
-        const nextEnd = moment().tz("Asia/Kolkata").set({ hour: nextHour, minute: nextMinute }).startOf('hour');
-        res.json(lastInsideBarsData || await fetchHourlyCandleData(nextStart, nextEnd));
+    // Return the last available data if it exists
+    if (lastInsideBarsData) {
+        return res.json(lastInsideBarsData);
     } else {
-        // If we are past the last scheduled time, return the last fetched data
-        res.json(lastInsideBarsData || { message: "No data available yet." });
+        return res.json({ message: "No data available yet." });
     }
 });
 
