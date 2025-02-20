@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const yahooFinance = require('yahoo-finance2').default;
 const moment = require('moment-timezone');
-const schedule = require('node-schedule');
 const axios = require('axios');
 
 const app = express();
@@ -12,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 const stocks = [
-    "AXISBANK.NS", "AUBANK.NS", "BANDHANBNK.NS", "BANKBARODA.NS", "BANKINDIA.NS",
+   "AXISBANK.NS", "AUBANK.NS", "BANDHANBNK.NS", "BANKBARODA.NS", "BANKINDIA.NS",
     "CANBK.NS", "CUB.NS", "FEDERALBNK.NS", "HDFCBANK.NS", "ICICIBANK.NS",
     "IDFCFIRSTB.NS", "INDUSINDBK.NS", "KOTAKBANK.NS", "PNB.NS", "RBLBANK.NS",
     "SBIN.NS", "YESBANK.NS", "ABCAPITAL.NS", "ANGELONE.NS", "BAJFINANCE.NS",
@@ -45,11 +44,15 @@ const stocks = [
 ];
 
 const PREVIOUS_DAY_URL = "https://local-high-production.up.railway.app/stocks";
-
 let lastInsideBarsData = null;
 
-const fetchHourlyCandleData = async (start, end) => {
+const fetchHourlyCandleData = async (manualRun = false) => {
     let insideBars = [];
+    const now = moment().tz("Asia/Kolkata");
+    
+    // If manual run, fetch last complete candle pair
+    let end = manualRun ? now.startOf('hour') : now.startOf('hour').subtract(1, 'hour');
+    let start = end.clone().subtract(2, 'hour'); // Fetch last 2 completed candles
 
     try {
         const previousDayDataResponse = await axios.get(PREVIOUS_DAY_URL);
@@ -69,11 +72,11 @@ const fetchHourlyCandleData = async (start, end) => {
                 }
 
                 const candles = result.quotes.slice(-2); // Last 2 candles
-                const motherCandle = candles[0]; // First of last two
-                const babyCandle = candles[1]; // Most recent
+                const motherCandle = candles[0]; // (T-2) to (T-1)
+                const babyCandle = candles[1]; // (T-1) to T
 
                 const motherHigh = motherCandle.high || 0;
-                const motherLow = motherCandle.low || 0; // Correctly fetching low
+                const motherLow = motherCandle.low || 0;
                 const babyHigh = babyCandle.high || 0;
                 const babyLow = babyCandle.low || 0;
 
@@ -91,6 +94,7 @@ const fetchHourlyCandleData = async (start, end) => {
                     }
 
                     let motherCandleChange = ((motherCandle.close - motherCandle.open) / motherCandle.open) * 100;
+                    let babyCandleChange = ((babyCandle.close - babyCandle.open) / babyCandle.open) * 100;
 
                     insideBars.push({
                         symbol: stock,
@@ -99,65 +103,45 @@ const fetchHourlyCandleData = async (start, end) => {
                         motherCandle: {
                             timestamp: moment(motherCandle.date).tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
                             high: motherHigh,
-                            low: motherLow,  // Correctly fetching low
+                            low: motherLow,
                             change: motherCandleChange.toFixed(2) + "%"
                         },
                         babyCandle: {
                             timestamp: moment(babyCandle.date).tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
                             high: babyHigh,
-                            low: babyLow
-                        },
-                        prevDay: {
-                            high: prevDayHigh,
-                            low: prevDayLow
+                            low: babyLow,
+                            change: babyCandleChange.toFixed(2) + "%"
                         }
                     });
-                } else {
-                    insideBars.push({ symbol: stock, isInsideBar: false });
                 }
             } catch (error) {
-                console.error(`❌ Error fetching data for ${stock}:`, error.message);
+                console.error(`Error fetching data for ${stock}:`, error.message);
             }
         }
+
+        lastInsideBarsData = insideBars;
+        return insideBars;
     } catch (error) {
-        console.error("❌ Error fetching previous day high/low:", error.message);
+        console.error("Error fetching previous day data:", error.message);
+        return [];
     }
-
-    lastInsideBarsData = insideBars;
-    return insideBars;
 };
-
-const scheduleCandleFetch = (hour, minute) => {
-    schedule.scheduleJob(`${minute} ${hour} * * *`, async () => {
-        const now = moment().tz("Asia/Kolkata");
-        const end = now.clone().startOf('hour');
-        const start = end.clone().subtract(2, 'hour');
-        console.log(`⏳ Running scheduled task at ${now.format("HH:mm")}`);
-        await fetchHourlyCandleData(start, end);
-    });
-};
-
-// Schedule the job at specific times
-const scheduleTimes = [
-    { hour: 11, minute: 20 },
-    { hour: 12, minute: 20 },
-    { hour: 13, minute: 20 },
-    { hour: 14, minute: 20 }
-];
-
-scheduleTimes.forEach(({ hour, minute }) => {
-    scheduleCandleFetch(hour, minute);
-});
 
 app.get('/inside-bars', async (req, res) => {
-    // Return the last available data if it exists
+    const result = await fetchHourlyCandleData(false);
+    res.json(result);
+});
+
+// Manual run endpoint
+app.get('/manual-run', async (req, res) => {
     if (lastInsideBarsData) {
         return res.json(lastInsideBarsData);
-    } else {
-        return res.json({ message: "No data available yet." });
     }
+
+    const result = await fetchHourlyCandleData(true);
+    res.json(result);
 });
 
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
