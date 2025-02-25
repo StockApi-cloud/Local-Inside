@@ -17,6 +17,7 @@
     "moment-timezone": "^0.5.47",
     "node-cron": "^3.0.3",
     "node-schedule": "^2.1.1",
+    "ws": "^8.18.1",
     "yahoo-finance2": "^2.13.3"
   }
 }
