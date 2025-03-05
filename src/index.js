@@ -100,7 +100,7 @@ const fetchHourlyCandleData = async () => {
 };
 
 // Schedule task at 11:17, 12:17, 13:17, 14:17, 15:17
-const scheduleTimes = ['17 11 * * *', '17 12 * * *', '17 13 * * *', '17 14 * * *', '17 15 * * *'];
+const scheduleTimes = ['25 11 * * *', '25 12 * * *', '25 13 * * *', '25 14 * * *', '25 15 * * *'];
 scheduleTimes.forEach(time => {
     schedule.scheduleJob(time, async () => {
         console.log(`🔄 Fetching inside bars at ${moment().tz("Asia/Kolkata").format("HH:mm")}`);
