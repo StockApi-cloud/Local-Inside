@@ -6,7 +6,7 @@ const axios = require('axios');
 const schedule = require('node-schedule');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
@@ -100,7 +100,7 @@ const fetchHourlyCandleData = async () => {
 };
 
 // Schedule task at 11:17, 12:17, 13:17, 14:17, 15:17
-const scheduleTimes = ['17 11 * * *', '17 12 * * *', '17 13 * * *', '17 14 * * *', '17 15 * * *'];
+const scheduleTimes = ['30 11 * * *', '30 12 * * *', '30 13 * * *', '30 14 * * *', '30 15 * * *'];
 scheduleTimes.forEach(time => {
     schedule.scheduleJob(time, async () => {
         console.log(`🔄 Fetching inside bars at ${moment().tz("Asia/Kolkata").format("HH:mm")}`);
